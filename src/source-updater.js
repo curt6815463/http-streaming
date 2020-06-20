@@ -5,12 +5,14 @@ import videojs from 'video.js';
 import logger from './util/logger';
 import noop from './util/noop';
 import { buffered } from './util/buffer';
-import {getMimeForCodec} from '@videojs/vhs-utils/dist/codecs.js';
+import { getMimeForCodec } from '@videojs/vhs-utils/dist/codecs.js';
 
 const updating = (type, sourceUpdater) => {
   const sourceBuffer = sourceUpdater[`${type}Buffer`];
 
-  return (sourceBuffer && sourceBuffer.updating) || sourceUpdater.queuePending[type];
+  return (
+    (sourceBuffer && sourceBuffer.updating) || sourceUpdater.queuePending[type]
+  );
 };
 
 const nextQueueIndexOfType = (type, queue) => {
@@ -106,6 +108,8 @@ const actions = {
   appendBuffer: (bytes, segmentInfo) => (type, sourceUpdater) => {
     const sourceBuffer = sourceUpdater[`${type}Buffer`];
 
+    console.log('type', type);
+    console.log('segmentInfo', segmentInfo);
     sourceUpdater.logger_(`Appending segment ${segmentInfo.mediaIndex}'s ${bytes.length} bytes to ${type}Buffer`);
 
     sourceBuffer.appendBuffer(bytes);
@@ -150,7 +154,7 @@ const actions = {
   }
 };
 
-const pushQueue = ({type, sourceUpdater, action, doneFn, name}) => {
+const pushQueue = ({ type, sourceUpdater, action, doneFn, name }) => {
   sourceUpdater.queue.push({
     type,
     action,
@@ -278,7 +282,7 @@ export default class SourceUpdater extends videojs.EventTarget {
    * @see http://www.w3.org/TR/media-source/#widl-SourceBuffer-appendBuffer-void-ArrayBuffer-data
    */
   appendBuffer(options, doneFn) {
-    const {segmentInfo, type, bytes} = options;
+    const { segmentInfo, type, bytes } = options;
 
     this.processedAppend_ = true;
     if (type === 'audio' && this.videoBuffer && !this.videoAppendQueued_) {
@@ -290,7 +294,7 @@ export default class SourceUpdater extends videojs.EventTarget {
     pushQueue({
       type,
       sourceUpdater: this,
-      action: actions.appendBuffer(bytes, segmentInfo || {mediaIndex: -1}),
+      action: actions.appendBuffer(bytes, segmentInfo || { mediaIndex: -1 }),
       doneFn,
       name: 'appendBuffer'
     });
@@ -312,12 +316,14 @@ export default class SourceUpdater extends videojs.EventTarget {
   }
 
   audioBuffered() {
-    return this.audioBuffer && this.audioBuffer.buffered ? this.audioBuffer.buffered :
+    return this.audioBuffer && this.audioBuffer.buffered ?
+      this.audioBuffer.buffered :
       videojs.createTimeRange();
   }
 
   videoBuffered() {
-    return this.videoBuffer && this.videoBuffer.buffered ? this.videoBuffer.buffered :
+    return this.videoBuffer && this.videoBuffer.buffered ?
+      this.videoBuffer.buffered :
       videojs.createTimeRange();
   }
 
@@ -424,10 +430,12 @@ export default class SourceUpdater extends videojs.EventTarget {
    * @return {number} the timestamp offset
    */
   audioTimestampOffset(offset) {
-    if (typeof offset !== 'undefined' &&
-        this.audioBuffer &&
-        // no point in updating if it's the same
-        this.audioTimestampOffset_ !== offset) {
+    if (
+      typeof offset !== 'undefined' &&
+      this.audioBuffer &&
+      // no point in updating if it's the same
+      this.audioTimestampOffset_ !== offset
+    ) {
       pushQueue({
         type: 'audio',
         sourceUpdater: this,
@@ -445,10 +453,12 @@ export default class SourceUpdater extends videojs.EventTarget {
    * @return {number} the timestamp offset
    */
   videoTimestampOffset(offset) {
-    if (typeof offset !== 'undefined' &&
-        this.videoBuffer &&
-        // no point in updating if it's the same
-        this.videoTimestampOffset !== offset) {
+    if (
+      typeof offset !== 'undefined' &&
+      this.videoBuffer &&
+      // no point in updating if it's the same
+      this.videoTimestampOffset !== offset
+    ) {
       pushQueue({
         type: 'video',
         sourceUpdater: this,
@@ -539,7 +549,10 @@ export default class SourceUpdater extends videojs.EventTarget {
     this.videoAppendQueued_ = false;
     this.delayedAudioAppendQueue_.length = 0;
 
-    this.mediaSource.removeEventListener('sourceopen', this.sourceopenListener_);
+    this.mediaSource.removeEventListener(
+      'sourceopen',
+      this.sourceopenListener_
+    );
 
     this.off();
   }

@@ -99,11 +99,6 @@
     "node": ">=8",
     "npm": ">=5"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "lint-staged": {
     "*.js": [
       "vjsstandard --fix",
